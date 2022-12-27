@@ -3,6 +3,8 @@ const { Ticket } = require("../models/tickets");
 
 const { v4: uuidv4 } = require("uuid");
 const request = require("request");
+const { BoughtTicket } = require("../models/bout-tickets");
+const PendingTicketPurchase = require("../models/pending-ticket-purchases");
 
 exports.createTicket = async (req, res) => {
   try {
@@ -132,15 +134,27 @@ exports.buyEventTicket = async (req, res) => {
           },
           body: body,
         },
-        function (error, response, body) {
+        async function (error, response, body) {
           if (error) {
             console.log(error);
           } else {
             const sendRes = JSON.parse(body);
 
             if (sendRes.success === true) {
+              //set pending purchase
+
+              const newPendingTicketPurchase = new PendingTicketPurchase({
+                user: userID,
+                ticket: eventTicketID,
+                amount,
+                phoneNumber,
+                accountNumber,
+                verified: false,
+              });
+
+              const pendingTicket = await newPendingTicketPurchase.save();
+
               //check payment
-              let paymentStatus = 0;
               const interval = setInterval(() => {
                 console.log("---------Checking payment---------");
                 request(
@@ -152,7 +166,7 @@ exports.buyEventTicket = async (req, res) => {
                       Accept: "application/json",
                     },
                   },
-                  function (error, response, body) {
+                  async function (error, response, body) {
                     if (error) {
                       console.log(error);
                     } else {
@@ -161,6 +175,36 @@ exports.buyEventTicket = async (req, res) => {
                       if (newBody.is_complete === 1) {
                         clearInterval(interval);
                         clearTimeout(timeOut);
+
+                        const ticketNumber =
+                          "A30T" +
+                          Math.floor(
+                            100000 + Math.random() * 900000
+                          ).toString();
+
+                        //Update pending record
+                        await PendingTicketPurchase.updateOne(
+                          {
+                            _id: pendingTicket._id,
+                          },
+                          { verified: true }
+                        );
+
+                        //Update number of tickets left
+                        await Ticket.findOneAndUpdate(
+                          { _id: eventTicketID },
+                          { $inc: { numberOfTickets: -1 } }
+                        );
+
+                        //create bought ticket
+                        const newBougtTicket = new BoughtTicket({
+                          user: userID,
+                          ticket: eventTicketID,
+                          ticketNumber: ticketNumber,
+                          checkedIn: false,
+                        });
+
+                        await newBougtTicket.save();
 
                         res.json({
                           status: "Success",
