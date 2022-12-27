@@ -231,3 +231,42 @@ exports.verifyCode = async (req, res) => {
     }
   );
 };
+
+exports.login = async (req, res) => {
+  try {
+    const { phoneNumber, password } = req.body;
+    const user = await User.findOne({ phoneNumber });
+    if (!user) {
+      //user not found
+      res.json({
+        status: "Failed",
+        message: "No user found with the given phone number. Please sign up",
+      });
+    } else {
+      //user found
+      //compare passwords
+      const hashedPassword = user.password;
+      const validUser = await bcrypt.compare(password, hashedPassword);
+      if (!validUser) {
+        //wrong password
+        res.json({
+          status: "Failed",
+          message: "Wrong password. Please try again",
+        });
+      } else {
+        //correct password
+        res.json({
+          status: "Success",
+          message: "Login successfull",
+          data: { userID: user._id },
+        });
+      }
+    }
+  } catch (error) {
+    console.log(error);
+    res.json({
+      status: "Failed",
+      message: "Something went wrong",
+    });
+  }
+};
