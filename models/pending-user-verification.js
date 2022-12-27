@@ -8,6 +8,7 @@ const PendingUserVerificationSchema = new Schema(
   },
   { timestamps: true }
 );
+
 PendingUserVerificationSchema.index(
   { createdAt: 1 },
   { expireAfterSeconds: 600 }

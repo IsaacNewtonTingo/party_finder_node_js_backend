@@ -17,6 +17,8 @@ app.listen(PORT, () => {
 require("./config/db");
 const UserRouter = require("./routes/user");
 const EventRouter = require("./routes/events");
+const TicketRoute = require("./routes/tickets");
 
 app.use("/api/user", UserRouter);
 app.use("/api/event", EventRouter);
+app.use("/api/ticket", TicketRoute);

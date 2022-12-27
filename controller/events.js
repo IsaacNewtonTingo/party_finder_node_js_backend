@@ -5,6 +5,8 @@ exports.createEvent = async (req, res) => {
     const {
       eventName,
       description,
+      eventDate,
+      organizer,
       performers,
       regularEntryFee,
       vipEntryFee,
@@ -25,6 +27,16 @@ exports.createEvent = async (req, res) => {
       res.json({
         status: "Failed",
         message: "Please add a description",
+      });
+    } else if (!eventDate) {
+      res.json({
+        status: "Failed",
+        message: "Please add the event date",
+      });
+    } else if (!organizer) {
+      res.json({
+        status: "Failed",
+        message: "Please add an organizer",
       });
     } else if (!regularEntryFee) {
       res.json({
@@ -60,6 +72,8 @@ exports.createEvent = async (req, res) => {
       const newEvent = new Event({
         eventName,
         description,
+        eventDate,
+        organizer,
         performers,
         regularEntryFee,
         vipEntryFee,
@@ -69,6 +83,7 @@ exports.createEvent = async (req, res) => {
         image3,
         locationName,
         locationCoordinates,
+        active: true,
       });
 
       await newEvent.save().then(() => {
