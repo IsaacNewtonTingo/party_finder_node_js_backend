@@ -8,11 +8,6 @@ const credentials = {
   username: process.env.AFRICAS_TALKING_USER_NAME,
 };
 
-const sandbox_credentials = {
-  apiKey: process.env.AFRICAS_TALKING_SANDBOX_API_KEY,
-  username: process.env.AFRICAS_TALKING_SANDBOX_USER_NAME,
-};
-
 const AfricasTalking = require("africastalking")(credentials);
 
 exports.signup = async (req, res) => {
