@@ -2,6 +2,8 @@ const { EventAttendee } = require("../models/event-attendees");
 const { EventComment } = require("../models/event-comments");
 const { Event } = require("../models/events");
 
+//Done by admin
+//create event
 exports.createEvent = async (req, res) => {
   try {
     const {
@@ -104,6 +106,22 @@ exports.createEvent = async (req, res) => {
   }
 };
 
+//delete event
+exports.deleteEvent = async (req, res) => {};
+
+//update an event
+exports.editEvent = async (req, res) => {};
+
+// .
+// .
+// .
+// .
+// .
+// .
+// .
+// .
+
+//Done by users
 exports.getAllEvents = async (req, res) => {
   try {
     await Event.find({}).then((response) => {
@@ -238,7 +256,7 @@ exports.optOutOfEvent = async (req, res) => {
   }
 };
 
-//get event attendies
+//get event attendees
 exports.getEventAttendees = async (req, res) => {
   try {
     const eventID = req.params.id;
@@ -357,6 +375,45 @@ exports.getEventComments = async (req, res) => {
     res.json({
       status: "Failed",
       message: "Something went wrong while trying to post your comment",
+    });
+  }
+};
+
+//delete comment
+exports.deleteEventComment = async (req, res) => {
+  try {
+    const commentID = req.params.id;
+    const { userID } = req.body;
+    //check if comment exists first
+    const comment = await EventComment.findOne({
+      _id: commentID,
+    });
+    if (comment) {
+      if (comment.user != userID) {
+        //not authorized
+        res.json({
+          status: "Failed",
+          message: "Anauthorized operation",
+        });
+      } else {
+        //authorized
+        await EventComment.findOneAndDelete({ _id: commentID });
+        res.json({
+          status: "Success",
+          message: "Comment deleted successfully",
+        });
+      }
+    } else {
+      res.json({
+        status: "Failed",
+        message: "Comment not found",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.json({
+      status: "Failed",
+      message: "Something went wrong while trying to delete your comment",
     });
   }
 };

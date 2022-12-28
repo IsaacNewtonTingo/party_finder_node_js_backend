@@ -9,6 +9,7 @@ const {
   optOutOfEvent,
   addEventComment,
   getEventComments,
+  deleteEventComment,
 } = require("../controller/events");
 
 //Only admin can add these special events
@@ -20,5 +21,6 @@ router.post("/opt-out-of-event/", optOutOfEvent);
 router.get("/get-event-attendees/:id", getEventAttendees);
 router.post("/add-event-comment", addEventComment);
 router.get("/get-event-comments/:id", getEventComments);
+router.delete("/delete-event-comments/:id", deleteEventComment);
 
 module.exports = router;
