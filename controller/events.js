@@ -247,7 +247,10 @@ exports.getEventAttendees = async (req, res) => {
     if (event) {
       //event exists
       if (event.active == true) {
-        const eventAttendees = await EventAttendee.find({});
+        const eventAttendees = await EventAttendee.find({}).populate(
+          "user",
+          "firstName lastName profilePicture"
+        );
         res.json({
           status: "Success",
           message: "Data found",
@@ -328,7 +331,9 @@ exports.getEventComments = async (req, res) => {
     if (event) {
       //event exists
       if (event.active == true) {
-        const eventComments = await EventComment.find({ event: eventID });
+        const eventComments = await EventComment.find({
+          event: eventID,
+        }).populate("user", "firstName lastName profilePicture");
         res.json({
           status: "Success",
           message: "Events comments found",
