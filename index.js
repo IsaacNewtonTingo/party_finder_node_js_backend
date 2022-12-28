@@ -18,7 +18,9 @@ require("./config/db");
 const UserRouter = require("./routes/user");
 const EventRouter = require("./routes/events");
 const TicketRoute = require("./routes/tickets");
+const PostRouter = require("./routes/post");
 
 app.use("/api/user", UserRouter);
 app.use("/api/event", EventRouter);
 app.use("/api/ticket", TicketRoute);
+app.use("/api/post", PostRouter);
