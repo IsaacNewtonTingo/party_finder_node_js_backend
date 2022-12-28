@@ -5,6 +5,7 @@ const { v4: uuidv4 } = require("uuid");
 const request = require("request");
 const { BoughtTicket } = require("../models/bout-tickets");
 const PendingTicketPurchase = require("../models/pending-ticket-purchases");
+const { EventAttendee } = require("../models/event-attendees");
 
 exports.createTicket = async (req, res) => {
   try {
@@ -117,6 +118,8 @@ exports.buyEventTicket = async (req, res) => {
       "event"
     );
 
+    const eventID = ticket.event._id;
+
     if (ticket.event.active === true) {
       //make payment via mpesa
       const amount = ticket.ticketPrice;
@@ -205,6 +208,18 @@ exports.buyEventTicket = async (req, res) => {
                         });
 
                         await newBougtTicket.save();
+
+                        //add to attendees
+                        await EventAttendee.findOneAndDelete({
+                          $and: [{ user: userID }, { event: eventID }],
+                        });
+
+                        const newEventAttendee = new EventAttendee({
+                          user: userID,
+                          event: eventID,
+                        });
+
+                        await newEventAttendee.save();
 
                         res.json({
                           status: "Success",

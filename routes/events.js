@@ -7,6 +7,8 @@ const {
   joinEvent,
   getEventAttendees,
   optOutOfEvent,
+  addEventComment,
+  getEventComments,
 } = require("../controller/events");
 
 //Only admin can add these special events
@@ -16,5 +18,7 @@ router.get("/get-one-event/:id", getOneEvent);
 router.post("/join-event/", joinEvent);
 router.post("/opt-out-of-event/", optOutOfEvent);
 router.get("/get-event-attendees/:id", getEventAttendees);
+router.post("/add-event-comment", addEventComment);
+router.get("/get-event-comments/:id", getEventComments);
 
 module.exports = router;

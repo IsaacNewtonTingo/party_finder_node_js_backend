@@ -1,4 +1,5 @@
 const { EventAttendee } = require("../models/event-attendees");
+const { EventComment } = require("../models/event-comments");
 const { Event } = require("../models/events");
 
 exports.createEvent = async (req, res) => {
@@ -270,6 +271,87 @@ exports.getEventAttendees = async (req, res) => {
     res.json({
       status: "Failed",
       message: "Something went wrong while trying to get event attendees",
+    });
+  }
+};
+
+//add event comments
+exports.addEventComment = async (req, res) => {
+  try {
+    const { userID, content, eventID } = req.body;
+
+    //check if event is active
+    const event = await Event.findOne({ _id: eventID });
+    if (event) {
+      //event exists
+      if (event.active == true) {
+        const newEventComment = new EventComment({
+          user: userID,
+          event: eventID,
+          content,
+        });
+
+        await newEventComment.save();
+        res.json({
+          status: "Success",
+          message: "Comment added successfully",
+        });
+      } else {
+        res.json({
+          status: "Failed",
+          message: "Event has expired",
+        });
+      }
+    } else {
+      //event not found
+      res.json({
+        status: "Failed",
+        message: "Event not found",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.json({
+      status: "Failed",
+      message: "Something went wrong while trying to post your comment",
+    });
+  }
+};
+
+//get event comments
+exports.getEventComments = async (req, res) => {
+  try {
+    const eventID = req.params.id;
+
+    //check if event is active
+    const event = await Event.findOne({ _id: eventID });
+    if (event) {
+      //event exists
+      if (event.active == true) {
+        const eventComments = await EventComment.find({ event: eventID });
+        res.json({
+          status: "Success",
+          message: "Events comments found",
+          data: eventComments,
+        });
+      } else {
+        res.json({
+          status: "Failed",
+          message: "Event has expired",
+        });
+      }
+    } else {
+      //event not found
+      res.json({
+        status: "Failed",
+        message: "Event not found",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.json({
+      status: "Failed",
+      message: "Something went wrong while trying to post your comment",
     });
   }
 };
