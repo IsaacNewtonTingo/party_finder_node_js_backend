@@ -1,5 +1,6 @@
 const { Post } = require("../models/post");
 const { PostComment } = require("../models/post-comments");
+const { PostLike } = require("../models/post-likes");
 //create post
 exports.createPost = async (req, res) => {
   try {
@@ -96,6 +97,7 @@ exports.deletePost = async (req, res) => {
         });
       } else {
         await Post.findOneAndDelete({ _id: postID });
+        await PostComment.deleteMany({ post: postID });
         res.json({
           status: "Success",
           message: "Post deleted successfully",
@@ -199,13 +201,153 @@ exports.addPostComment = async (req, res) => {
 };
 
 //get post comments
-exports.getPostComments = async (req, res) => {};
+exports.getPostComments = async (req, res) => {
+  try {
+    const postID = req.params.id;
+
+    //check if post exists
+    const post = await Post.findOne({ _id: postID });
+    if (post) {
+      //post found get comments
+      const comments = await PostComment.find({}).populate(
+        "user",
+        "firstName lastName profilePicture"
+      );
+      res.json({
+        status: "Success",
+        message: "Comments found successfully",
+        data: comments,
+      });
+    } else {
+      res.json({
+        status: "Failed",
+        message: "Post not found",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.json({
+      status: "Failed",
+      message: "An error occured while getting comments",
+    });
+  }
+};
 
 //delete post comment
-exports.deletePostComment = async (req, res) => {};
+exports.deletePostComment = async (req, res) => {
+  try {
+    const postCommentID = req.params.id;
+    const { userID } = req.body;
+
+    //check if comment exists
+    const comment = await PostComment.findOneAndDelete({
+      $and: [{ user: userID }, { _id: postCommentID }],
+    });
+    if (comment) {
+      res.json({
+        status: "Success",
+        message: "Comments deleted successfully",
+      });
+    } else {
+      res.json({
+        status: "Failed",
+        message: "Comment not found",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.json({
+      status: "Failed",
+      message: "An error occured while deleting comment",
+    });
+  }
+};
 
 //like post
-exports.likePost = async (req, res) => {};
+exports.likePostController = async (req, res) => {
+  try {
+    const postID = req.params.id;
+    const { userID } = req.body;
 
-//unlike post
-exports.unlikePost = async (req, res) => {};
+    //check if post exists
+    const post = await Post.findOne({
+      _id: postID,
+    });
+    if (post) {
+      //check if post is already liked
+      const likedPost = await PostLike.findOne({
+        $and: [{ user: userID }, { post: postID }],
+      });
+      if (likedPost) {
+        //has already liked
+        //unlike
+        await PostLike.deleteMany({
+          $and: [{ user: userID }, { post: postID }],
+        });
+
+        res.json({
+          status: "Success",
+          message: "Post unliked successfully",
+        });
+      } else {
+        //not liked
+        const newPostLike = new PostLike({
+          user: userID,
+          post: postID,
+        });
+
+        await newPostLike.save();
+        res.json({
+          status: "Success",
+          message: "Post liked successfully",
+        });
+      }
+    } else {
+      res.json({
+        status: "Failed",
+        message: "Post not found",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.json({
+      status: "Failed",
+      message: "An error occured while liking the post",
+    });
+  }
+};
+
+//get post likes
+exports.getPostLikes = async (req, res) => {
+  try {
+    const postID = req.params.id;
+
+    //check if post exists
+    const post = await Post.findOne({
+      _id: postID,
+    });
+    if (post) {
+      const postLikes = await PostLike.find({
+        post: postID,
+      }).populate("user", "firstName lastName profilePicture");
+
+      res.json({
+        status: "Success",
+        message: "Post likes retrieved successfully",
+        data: postLikes,
+        count: postLikes.length,
+      });
+    } else {
+      res.json({
+        status: "Failed",
+        message: "Post not found",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.json({
+      status: "Failed",
+      message: "An error occured while getting likes",
+    });
+  }
+};
