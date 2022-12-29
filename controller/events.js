@@ -1,6 +1,7 @@
 const { EventAttendee } = require("../models/event-attendees");
 const { EventComment } = require("../models/event-comments");
 const { EventLike } = require("../models/event-likes");
+const { EventSave } = require("../models/event-save");
 const { Event } = require("../models/events");
 
 //Done by admin
@@ -611,3 +612,55 @@ exports.getEventLikes = async (req, res) => {
 };
 
 //save event
+exports.saveEventController = async (req, res) => {
+  try {
+    const eventID = req.params.id;
+    const { userID } = req.body;
+
+    //check if event exists
+    const event = await Event.findOne({
+      _id: eventID,
+    });
+    if (event) {
+      //check if event is already saved
+      const savedEvent = await EventSave.findOne({
+        $and: [{ user: userID }, { event: eventID }],
+      });
+      if (savedEvent) {
+        //has already saved
+        //unsave
+        await EventSave.deleteMany({
+          $and: [{ user: userID }, { event: eventID }],
+        });
+
+        res.json({
+          status: "Success",
+          message: "Event unsaved successfully",
+        });
+      } else {
+        //not saved
+        const newEventSave = new EventSave({
+          user: userID,
+          event: eventID,
+        });
+
+        await newEventSave.save();
+        res.json({
+          status: "Success",
+          message: "Event saved successfully",
+        });
+      }
+    } else {
+      res.json({
+        status: "Failed",
+        message: "Event not found",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.json({
+      status: "Failed",
+      message: "An error occured while liking the event",
+    });
+  }
+};
