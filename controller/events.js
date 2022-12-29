@@ -3,8 +3,8 @@ const { EventComment } = require("../models/event-comments");
 const { EventLike } = require("../models/event-likes");
 const { EventSave } = require("../models/event-save");
 const { Event } = require("../models/events");
+const User = require("../models/user");
 
-//Done by admin
 //create event
 exports.createEvent = async (req, res) => {
   try {
@@ -12,7 +12,7 @@ exports.createEvent = async (req, res) => {
       eventName,
       description,
       eventDate,
-      organizer,
+      userID,
       performers,
       regularEntryFee,
       vipEntryFee,
@@ -20,6 +20,7 @@ exports.createEvent = async (req, res) => {
       image1,
       image2,
       image3,
+      buildingName,
       locationName,
       locationCoordinates,
     } = req.body;
@@ -64,6 +65,11 @@ exports.createEvent = async (req, res) => {
         status: "Failed",
         message: "Please add 3 images",
       });
+    } else if (!buildingName) {
+      res.json({
+        status: "Failed",
+        message: "Please add the building name",
+      });
     } else if (!locationName) {
       res.json({
         status: "Failed",
@@ -75,29 +81,63 @@ exports.createEvent = async (req, res) => {
         message: "Please add actual location coordinates",
       });
     } else {
-      const newEvent = new Event({
-        eventName,
-        description,
-        eventDate,
-        organizer,
-        performers,
-        regularEntryFee,
-        vipEntryFee,
-        vvipEntryFee,
-        image1,
-        image2,
-        image3,
-        locationName,
-        locationCoordinates,
-        active: true,
-      });
-
-      await newEvent.save().then(() => {
-        res.json({
-          status: "Success",
-          message: "Event created successfully",
+      //check if event is being created by a verified user
+      const user = await User.findOne({ _id: userID });
+      if (user.verified == true) {
+        const newEvent = new Event({
+          eventName,
+          description,
+          eventDate,
+          organizer: userID,
+          performers,
+          regularEntryFee,
+          vipEntryFee,
+          vvipEntryFee,
+          image1,
+          image2,
+          image3,
+          buildingName,
+          locationName,
+          locationCoordinates,
+          active: true,
+          verified: true,
+          featured: false,
         });
-      });
+
+        await newEvent.save().then(() => {
+          res.json({
+            status: "Success",
+            message: "Event created successfully",
+          });
+        });
+      } else {
+        const newEvent = new Event({
+          eventName,
+          description,
+          eventDate,
+          organizer: userID,
+          performers,
+          regularEntryFee,
+          vipEntryFee,
+          vvipEntryFee,
+          image1,
+          image2,
+          image3,
+          buildingName,
+          locationName,
+          locationCoordinates,
+          active: false,
+          verified: false,
+          featured: false,
+        });
+
+        await newEvent.save().then(() => {
+          res.json({
+            status: "Success",
+            message: "Event created successfully",
+          });
+        });
+      }
     }
   } catch (error) {
     console.log(error);
@@ -116,7 +156,7 @@ exports.editEvent = async (req, res) => {
       eventName,
       description,
       eventDate,
-      organizer,
+      userID,
       performers,
       regularEntryFee,
       vipEntryFee,
@@ -127,8 +167,12 @@ exports.editEvent = async (req, res) => {
       locationName,
       locationCoordinates,
     } = req.body;
+
+    //check if user is verified
     const eventID = req.params.id;
-    const event = await Event.findOne({ _id: eventID });
+    const event = await Event.findOne({
+      $and: [{ organizer: userID }, { _id: eventID }],
+    });
 
     if (event) {
       //event found
@@ -138,7 +182,6 @@ exports.editEvent = async (req, res) => {
           eventName,
           description,
           eventDate,
-          organizer,
           performers,
           regularEntryFee,
           vipEntryFee,
@@ -175,29 +218,18 @@ exports.deleteEvent = async (req, res) => {
   //when you delete, delete: Comments,events gooers,likes,saves
 };
 
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-
-//Done by users
+//Get all events
 exports.getAllEvents = async (req, res) => {
   try {
-    const { lng, lat, maxDistance } = req.query;
+    const { lng, lat } = req.query;
 
     const response = await Event.find({
       locationCoordinates: {
         $near: {
           $geometry: { type: "Point", coordinates: [lng, lat] },
-          // $maxDistance: maxDistance,
         },
       },
     });
-    const distance = "12km";
 
     res.json({
       status: "Success",
@@ -213,6 +245,7 @@ exports.getAllEvents = async (req, res) => {
   }
 };
 
+//get one event
 exports.getOneEvent = async (req, res) => {
   try {
     const eventID = req.params.id;

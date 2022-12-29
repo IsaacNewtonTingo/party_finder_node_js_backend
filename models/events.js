@@ -6,8 +6,15 @@ const EventSchema = new Schema(
     eventName: String,
     description: String,
     eventDate: Date,
-    organizer: String,
+    organizer: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
     performers: Array,
+    free: {
+      type: Boolean,
+      default: true,
+    },
     regularEntryFee: Number,
     vipEntryFee: Number,
     vvipEntryFee: Number,
@@ -17,6 +24,7 @@ const EventSchema = new Schema(
     image1: String,
     image2: String,
     image3: String,
+    buildingName: String,
     locationName: String,
     locationCoordinates: {
       type: {
@@ -29,7 +37,18 @@ const EventSchema = new Schema(
         required: true,
       },
     },
-    active: false,
+    active: {
+      type: Boolean,
+      default: false,
+    },
+    verified: {
+      type: Boolean,
+      default: false,
+    },
+    featured: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
