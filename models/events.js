@@ -33,6 +33,6 @@ const EventSchema = new Schema(
   },
   { timestamps: true }
 );
-// EventSchema.index({ createdAt: 1 }, { expireAfterSeconds: 600 });
+EventSchema.index({ locationCoordinates: "2dsphere" });
 
 exports.Event = mongoose.model("Event", EventSchema);

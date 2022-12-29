@@ -106,11 +106,72 @@ exports.createEvent = async (req, res) => {
   }
 };
 
-//delete event
-exports.deleteEvent = async (req, res) => {};
-
 //update an event
-exports.editEvent = async (req, res) => {};
+exports.editEvent = async (req, res) => {
+  try {
+    //check if event exists
+    const {
+      eventName,
+      description,
+      eventDate,
+      organizer,
+      performers,
+      regularEntryFee,
+      vipEntryFee,
+      vvipEntryFee,
+      image1,
+      image2,
+      image3,
+      locationName,
+      locationCoordinates,
+    } = req.body;
+    const eventID = req.params.id;
+    const event = await Event.findOne({ _id: eventID });
+
+    if (event) {
+      //event found
+      await Event.updateOne(
+        { _id: eventID },
+        {
+          eventName,
+          description,
+          eventDate,
+          organizer,
+          performers,
+          regularEntryFee,
+          vipEntryFee,
+          vvipEntryFee,
+          image1,
+          image2,
+          image3,
+          locationName,
+          locationCoordinates,
+        }
+      );
+
+      res.json({
+        status: "Success",
+        message: "Event updated successfully",
+      });
+    } else {
+      res.json({
+        status: "Failed",
+        message: "Event not found",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.json({
+      status: "Failed",
+      message: "Something went wrong while trying to update the event",
+    });
+  }
+};
+
+//delete event
+exports.deleteEvent = async (req, res) => {
+  //when you delete, delete: Comments,events gooers,likes,saves
+};
 
 // .
 // .
@@ -124,8 +185,22 @@ exports.editEvent = async (req, res) => {};
 //Done by users
 exports.getAllEvents = async (req, res) => {
   try {
-    await Event.find({}).then((response) => {
-      res.send(response);
+    const { lng, lat, maxDistance } = req.query;
+
+    const response = await Event.find({
+      locationCoordinates: {
+        $near: {
+          $geometry: { type: "Point", coordinates: [lng, lat] },
+          // $maxDistance: maxDistance,
+        },
+      },
+    });
+    const distance = "12km";
+
+    res.json({
+      status: "Success",
+      message: "Events retrieved successfully",
+      data: response,
     });
   } catch (error) {
     console.log(error);
@@ -409,6 +484,33 @@ exports.deleteEventComment = async (req, res) => {
         message: "Comment not found",
       });
     }
+  } catch (error) {
+    console.log(error);
+    res.json({
+      status: "Failed",
+      message: "Something went wrong while trying to delete your comment",
+    });
+  }
+};
+
+//search event
+exports.searchEvent = async (req, res) => {
+  try {
+    var { searchTerm } = req.query;
+    searchTerm = searchTerm.trim();
+
+    const searchResult = await Event.find({
+      $or: [
+        { eventName: { $regex: searchTerm, $options: "i" } },
+        { description: { $regex: searchTerm, $options: "i" } },
+      ],
+    });
+
+    res.json({
+      status: "Success",
+      message: "Search was successfull",
+      data: searchResult,
+    });
   } catch (error) {
     console.log(error);
     res.json({
