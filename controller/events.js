@@ -1,5 +1,6 @@
 const { EventAttendee } = require("../models/event-attendees");
 const { EventComment } = require("../models/event-comments");
+const { EventLike } = require("../models/event-likes");
 const { Event } = require("../models/events");
 
 //Done by admin
@@ -519,3 +520,94 @@ exports.searchEvent = async (req, res) => {
     });
   }
 };
+
+//event like
+exports.likeEventController = async (req, res) => {
+  try {
+    const eventID = req.params.id;
+    const { userID } = req.body;
+
+    //check if event exists
+    const event = await Event.findOne({
+      _id: eventID,
+    });
+    if (event) {
+      //check if event is already liked
+      const likedEvent = await EventLike.findOne({
+        $and: [{ user: userID }, { event: eventID }],
+      });
+      if (likedEvent) {
+        //has already liked
+        //unlike
+        await EventLike.deleteMany({
+          $and: [{ user: userID }, { event: eventID }],
+        });
+
+        res.json({
+          status: "Success",
+          message: "Event unliked successfully",
+        });
+      } else {
+        //not liked
+        const newEventLike = new EventLike({
+          user: userID,
+          event: eventID,
+        });
+
+        await newEventLike.save();
+        res.json({
+          status: "Success",
+          message: "Event liked successfully",
+        });
+      }
+    } else {
+      res.json({
+        status: "Failed",
+        message: "Event not found",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.json({
+      status: "Failed",
+      message: "An error occured while liking the event",
+    });
+  }
+};
+
+//get event likes
+exports.getEventLikes = async (req, res) => {
+  try {
+    const eventID = req.params.id;
+
+    //check if event exists
+    const event = await Event.findOne({
+      _id: eventID,
+    });
+    if (event) {
+      const eventLikes = await EventLike.find({
+        event: eventID,
+      }).populate("user", "firstName lastName profilePicture");
+
+      res.json({
+        status: "Success",
+        message: "Event likes retrieved successfully",
+        data: eventLikes,
+        count: eventLikes.length,
+      });
+    } else {
+      res.json({
+        status: "Failed",
+        message: "Event not found",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.json({
+      status: "Failed",
+      message: "An error occured while getting likes",
+    });
+  }
+};
+
+//save event

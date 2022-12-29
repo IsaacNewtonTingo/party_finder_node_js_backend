@@ -13,6 +13,8 @@ const {
   deleteEvent,
   editEvent,
   searchEvent,
+  likeEventController,
+  getEventLikes,
 } = require("../controller/events");
 
 //Only admin can add these special events
@@ -28,5 +30,7 @@ router.post("/add-event-comment", addEventComment);
 router.get("/get-event-comments/:id", getEventComments);
 router.delete("/delete-event-comments/:id", deleteEventComment);
 router.get("/search-event", searchEvent);
+router.post("/like-event/:id", likeEventController);
+router.get("/get-event-likes/:id", getEventLikes);
 
 module.exports = router;
