@@ -660,7 +660,29 @@ exports.saveEventController = async (req, res) => {
     console.log(error);
     res.json({
       status: "Failed",
-      message: "An error occured while liking the event",
+      message: "An error occured while saving the event",
+    });
+  }
+};
+
+//get my saved events
+exports.getSavedEvents = async (req, res) => {
+  try {
+    const userID = req.params.id;
+    const savedEvents = await EventSave.find({
+      user: userID,
+    });
+
+    res.json({
+      status: "Success",
+      message: "Saved events retrieved successfully",
+      data: savedEvents,
+    });
+  } catch (error) {
+    console.log(error);
+    res.json({
+      status: "Failed",
+      message: "An error occured while getting saved events",
     });
   }
 };

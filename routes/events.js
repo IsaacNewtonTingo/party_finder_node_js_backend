@@ -16,6 +16,7 @@ const {
   likeEventController,
   getEventLikes,
   saveEventController,
+  getSavedEvents,
 } = require("../controller/events");
 
 //Only admin can add these special events
@@ -34,5 +35,6 @@ router.get("/search-event", searchEvent);
 router.post("/like-event/:id", likeEventController);
 router.get("/get-event-likes/:id", getEventLikes);
 router.post("/save-event/:id", saveEventController);
+router.get("/get-saved-events/:id", getSavedEvents);
 
 module.exports = router;
