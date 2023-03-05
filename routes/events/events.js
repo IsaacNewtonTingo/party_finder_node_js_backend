@@ -17,7 +17,7 @@ const {
   getEventLikes,
   saveEventController,
   getSavedEvents,
-} = require("../controller/events");
+} = require("../../controller/envents/events");
 
 //Only admin can add these special events
 router.post("/create-event", createEvent);

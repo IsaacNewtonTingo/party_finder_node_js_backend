@@ -10,7 +10,8 @@ const {
   deletePostComment,
   likePostController,
   getPostLikes,
-} = require("../controller/post");
+} = require("../../controller/posts/post");
+
 const router = express.Router();
 
 router.post("/create-post", createPost);

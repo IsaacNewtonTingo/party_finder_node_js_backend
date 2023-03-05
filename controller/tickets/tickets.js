@@ -1,11 +1,12 @@
-const { Event } = require("../models/events");
-const { Ticket } = require("../models/tickets");
-
-const { v4: uuidv4 } = require("uuid");
 const request = require("request");
-const { BoughtTicket } = require("../models/bout-tickets");
-const PendingTicketPurchase = require("../models/pending-ticket-purchases");
-const { EventAttendee } = require("../models/event-attendees");
+const { v4: uuidv4 } = require("uuid");
+
+const { Event } = require("../../models/events/events");
+const { Ticket } = require("../../models/tickets/tickets");
+const { BoughtTicket } = require("../../models/tickets/bought-tickets");
+
+const PendingTicketPurchase = require("../../models/tickets/pending-ticket-purchases");
+const { EventAttendee } = require("../../models/events/event-attendees");
 
 exports.createTicket = async (req, res) => {
   try {

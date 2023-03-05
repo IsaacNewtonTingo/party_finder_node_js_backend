@@ -15,10 +15,10 @@ app.listen(PORT, () => {
 });
 
 require("./config/db");
-const UserRouter = require("./routes/user");
-const EventRouter = require("./routes/events");
-const TicketRoute = require("./routes/tickets");
-const PostRouter = require("./routes/post");
+const UserRouter = require("./routes/users/user");
+const EventRouter = require("./routes/events/events");
+const TicketRoute = require("./routes/tickets/tickets");
+const PostRouter = require("./routes/posts/post");
 
 app.use("/api/user", UserRouter);
 app.use("/api/event", EventRouter);

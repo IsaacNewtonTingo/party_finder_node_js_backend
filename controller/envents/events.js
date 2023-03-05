@@ -1,9 +1,9 @@
-const { EventAttendee } = require("../models/event-attendees");
-const { EventComment } = require("../models/event-comments");
-const { EventLike } = require("../models/event-likes");
-const { EventSave } = require("../models/event-save");
-const { Event } = require("../models/events");
-const User = require("../models/user");
+const { EventAttendee } = require("../../models/events/event-attendees");
+const { EventComment } = require("../../models/events/event-comments");
+const { EventLike } = require("../../models/events/event-likes");
+const { EventSave } = require("../../models/events/event-save");
+const { Event } = require("../../models/events/events");
+const User = require("../../models/users/user");
 
 //create event
 exports.createEvent = async (req, res) => {

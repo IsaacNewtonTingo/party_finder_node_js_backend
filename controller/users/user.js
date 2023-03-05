@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 
-const User = require("../models/user");
-const PendingUserVerification = require("../models/pending-user-verification");
+const User = require("../../models/users/user");
+const PendingUserVerification = require("../../models/users/pending-user-verification");
 
 const credentials = {
   apiKey: process.env.AFRICAS_TALKING_API_KEY,

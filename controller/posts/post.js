@@ -1,6 +1,6 @@
-const { Post } = require("../models/post");
-const { PostComment } = require("../models/post-comments");
-const { PostLike } = require("../models/post-likes");
+const { Post } = require("../../models/posts/post");
+const { PostComment } = require("../../models/posts/post-comments");
+const { PostLike } = require("../../models/posts/post-likes");
 //create post
 exports.createPost = async (req, res) => {
   try {
